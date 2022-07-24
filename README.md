@@ -11,9 +11,9 @@ Initial project goals / ideas:
 Allowing arduino capable builders to:
 
 - Build a minimum, economical midi floorboard for guitarists using the FAS products, that can evolve rapidly (eventually in future for supporting more products)
-- Support terh hardware: more displays, more arduino compatible boards
+- Support the hardware: more displays, more arduino compatible boards
 - Introduce new ideas and architecture compared to Pinfloid original such as:
    - autorepeat and acceleration when pushing a button (e.g. program next/previous change )
-   - repurpose the existing buttons layout to support with only 2 rows of switches features such as tuner and loop mode.
+   - re-purpose the existing buttons layout to support with only 2 rows of switches features such as tuner and loop mode.
 
    
