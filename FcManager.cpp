@@ -64,9 +64,13 @@ FcManager::FcManager(ProtocolType protType) {
 
 /// Controller initialization
 void FcManager::begin() {
-  _display.init();
+  
   initButtons();
   FcLeds::begin();
+  _display.init();
+#ifdef DEBUG
+  Serial.begin(115200);
+#endif
   
   Axe.begin(MIDI_PORT); // TODO in future: implement more midi devices not necesarily assuming a direct serial connection
   Axe.registerPresetChangeCallback(onPresetChange);
@@ -157,7 +161,6 @@ void FcManager::onSceneName(const SceneNumber number, const char* name, const by
 
 void FcManager::handleEvents() {
   for (byte currentSwitch = 0; currentSwitch < NUM_BUTTONS; currentSwitch++) {
-
     Buttons[currentSwitch].read();
     if (Buttons[currentSwitch].wasPressed()) {
 

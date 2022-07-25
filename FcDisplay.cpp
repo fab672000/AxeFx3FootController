@@ -45,7 +45,6 @@ void FcDisplay::init() {
     lcd.print("AxeFX3 EcoFootCtrl");
     lcd.setCursor(0, 1);
     lcd.print("Waiting connection..");
-    delay(500);
 }
 
 /// Clear the display screen

@@ -15,10 +15,6 @@
 static FcManager footController(ProtocolType::MIDI_AFX3);
 
 void setup() {
-#ifdef DEBUG
-  Serial.begin(9600);
-#endif
-
   footController.begin();
 }
 
