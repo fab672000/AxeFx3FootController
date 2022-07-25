@@ -1,4 +1,4 @@
-// Axe-FX III midi.controller 19-May-2019 20x4 I2C LCD Display Version
+// Axe-FX III midi.controller 
 //   License is GPL V3, see LICENSE.MD for more details
 // Displays preset/scene number and name on LCD
 // Tuner working, but only graphics (moving arrows). Displaying the Note Name may eventually get corrupted data.
@@ -10,23 +10,18 @@
 //  https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 //  https://github.com/JChristensen/Timer
 
-#define DEBUG
-
-#include <Timer.h>
 #include "config.h"
 #include "FcManager.h"
-
-static FcManager prot(ProtocolType::MIDI_AFX3);
+static FcManager footController(ProtocolType::MIDI_AFX3);
 
 void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
 
-  prot.begin();
+  footController.begin();
 }
 
 void loop() {
-  prot.update();
-  // timer.update();
+  footController.update();
 }

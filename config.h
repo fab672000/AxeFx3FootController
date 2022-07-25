@@ -5,20 +5,20 @@
 #define DEBUG
 
 // BOARDS
-#define BOARD_ATMEGA  1 /* AVR ATMEGA */
-#define BOARD_UNO     2 /* AVR UNO */
-#define BOARD_T40    11 /* TEENSY 4.0 */
+#define BOARD_ATMEGA           1 /* AVR ATMEGA */
+#define BOARD_MINI_TESTING     2 /* AVR or other small boards that have at minimum 3K of RAM */
+#define BOARD_T40             11 /* TEENSY 4.0 */
 
-#define BOARD BOARD_UNO
+#define BOARD BOARD_ATMEGA
 
 // DISPLAYS
 // TODO: add more displayys to encapsulate in FcDisplay class
-#define NO_DISPLAY         0
-#define LIQUID_DISPLAY_I2C 1
-#define ADAFRUIT_LCD_SHIELD 2
+#define NO_DISPLAY            0
+#define LIQUID_DISPLAY_I2C    1
+#define ADAFRUIT_LCD_SHIELD   2
 
 /// #define DISPLAY_TYPE LIQUID_DISPLAY_I2C
-#define DISPLAY_TYPE ADAFRUIT_LCD_SHIELD
+#define DISPLAY_TYPE LIQUID_DISPLAY_I2C
 
 // MIDI
 const byte MidiChannel = 1;
@@ -73,7 +73,7 @@ const byte MidiChannel = 1;
 #define LED15 51
 #define LED16 53
 
-#elif (BOARD == BOARD_UNO) /* for quick testing only 4 buttons mapping */
+#elif (BOARD == BOARD_MINI_TESTING) /* for quick testing only 4 buttons mapping */
 #define MIDI_PORT Serial
 #define NUM_BUTTONS 4
 #define BUTTON1 2

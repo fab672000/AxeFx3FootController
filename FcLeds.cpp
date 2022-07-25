@@ -8,7 +8,7 @@ Timer timer;
 static byte leds[NUM_LEDS] = {
 #if (BOARD == BOARD_ATMEGA) 
   LED1, LED2, LED3, LED4, LED5, LED6, LED7, LED8, LED9, LED10, LED11, LED12, LED13, LED14, LED15, LED16
-#elif (BOARD == BOARD_UNO) 
+#elif (BOARD == BOARD_MINI_TESTING) 
   LED1, LED2, LED3, LED4
 #endif
  };

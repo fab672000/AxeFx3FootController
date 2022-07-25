@@ -10,10 +10,11 @@ static ProtocolType _protType;
 static FcDisplay _display;
 
 static AxeSystem Axe;
-static Tempo tempo;
+
+//TODO: investigate for use of more tempo  functionality
+// static Tempo tempo;
 
 // Pedal / controller definitions
-static byte circlePedals = 0;
 static unsigned int pedalValue[numberOfPedals];
 static unsigned int pedalValueOld[numberOfPedals];
 static byte controllerValueOld[numberOfPedals];
@@ -35,16 +36,16 @@ static SceneInfo scenes[NUM_SCENES];
 static int  PresetNumb;
 static byte SceNumb;
  
+// BUTTONS handling
+
 static byte ButtonPin[NUM_BUTTONS] = {
 #if (BOARD == BOARD_ATMEGA) 
   BUTTON1, BUTTON2, BUTTON3, BUTTON4, BUTTON5, BUTTON6, BUTTON7, BUTTON8,
   BUTTON9, BUTTON10, BUTTON11, BUTTON12, BUTTON13, BUTTON14, BUTTON15, BUTTON16
-#elif (BOARD == BOARD_UNO) 
+#elif (BOARD == BOARD_MINI_TESTING) 
   BUTTON1, BUTTON2, BUTTON3, BUTTON4
 #endif
 };
-
-// BUTTONS handling
 
 static Button Buttons[NUM_BUTTONS];
 
@@ -283,35 +284,36 @@ void FcManager::handleEvents() {
       Serial.print("Switch "); Serial.print(currentSwitch + 1); Serial.println(" pressed.");
     }
   }
+  
   // TODO:
-  // prot.handleExpressionPedals();
+  // handleExpressionPedals();
 }
 
 void FcManager::handleExpressionPedals() {
   //This line smooths the measured values. The measured values of an unused potentiometer can jumb back and forth between values.
   // Without the smoothing the controller would constantly send CC data, which I don't want. There are other ways to smooth, but this one works best for me.
   // The values 0.4 and 0.6 need to add up to 1.0. 0.4 and 0.6 gave the best results. Change to taste!
-  for (circlePedals = 0; circlePedals < numberOfPedals; circlePedals++) {
-    pedalValue[circlePedals] = analogRead(pedal[circlePedals]) * 0.4 + pedalValueOld[circlePedals] * 0.6;
+  for (int i = 0; i < numberOfPedals; i++) {
+    pedalValue[i] = analogRead(pedal[i]) * 0.4 + pedalValueOld[i] * 0.6;
 
     //Here the measured values are scaled down to 0 to 127
-    controllerValue[circlePedals] = map(pedalValue[circlePedals], pedalValueCalibrationMinimumLevel[circlePedals],
-                                        pedalValueCalibrationMaximumLevel[circlePedals], controllerValueMinimumLevel[circlePedals], controllerValueMaximumLevel[circlePedals]);
+    controllerValue[i] = map(pedalValue[i], pedalValueCalibrationMinimumLevel[i],
+                                        pedalValueCalibrationMaximumLevel[i], controllerValueMinimumLevel[i], controllerValueMaximumLevel[i]);
 
     //Only send CC data in case the potentiometer / expression pedal is being used (turned) and in case it's not deactivated
-    if (controllerValue[circlePedals] != controllerValueOld[circlePedals] != 0) {
+    if (controllerValue[i]!=0 && controllerValue[i] != controllerValueOld[i]) {
 
-      Axe.sendControlChange(pedalCC[circlePedals], controllerValue[circlePedals], MidiChannel);
+      Axe.sendControlChange(pedalCC[i], controllerValue[i], MidiChannel);
       
 #ifdef DEBUG
     Serial.print("ExpPedal-1: "); 
-    Serial.println(controllerValue[circlePedals]);
+    Serial.println(controllerValue[i]);
 #endif
 
-      _display.displayControllerValue("ExpPedal-1", controllerValue[circlePedals]);
+      _display.displayControllerValue("ExpPedal-1", controllerValue[i]);
     }
-    controllerValueOld[circlePedals] = controllerValue[circlePedals];
-    pedalValueOld[circlePedals] = pedalValue[circlePedals];
+    controllerValueOld[i] = controllerValue[i];
+    pedalValueOld[i] = pedalValue[i];
   }
 }
 
