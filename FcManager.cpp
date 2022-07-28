@@ -39,7 +39,7 @@ static byte SceNumb;
 // BUTTONS handling
 
 static byte ButtonPin[NUM_BUTTONS] = {
-#if (BOARD == BOARD_ATMEGA) 
+#if (BOARD == BOARD_SW16_EXP4) 
   BUTTON1, BUTTON2, BUTTON3, BUTTON4, BUTTON5, BUTTON6, BUTTON7, BUTTON8,
   BUTTON9, BUTTON10, BUTTON11, BUTTON12, BUTTON13, BUTTON14, BUTTON15, BUTTON16
 #elif (BOARD == BOARD_MINI_TESTING) 
@@ -136,12 +136,12 @@ void FcManager::onTunerStatus(bool engaged) {
 
 void FcManager::onSceneName(const SceneNumber number, const char* name, const byte length) {
   if (number == 1) {
-    Serial.println("\n+++++++++++**+++++++++++\n\n");
+    Serial.println(F("\n+++++++++++**+++++++++++\n\n"));
   }
 
-  Serial.print("onSceneName(): ");
+  Serial.print(F("onSceneName(): "));
   Serial.print(number);
-  Serial.print(": ");
+  Serial.print(F(": "));
   Serial.println(name);
 
   //Record current scene in the list
@@ -226,7 +226,7 @@ void FcManager::handleEvents() {
             Axe.getLooper().record();
             FcLeds::setLooperLeds(1);
             //FcLeds::turnOffSceneLeds();
-            _display.print("RECORD              ");
+            _display.print(F("RECORD              "));
 
 
             //  uint32_t ti = (Buttons[currentSwitch].pressedFor());
@@ -243,7 +243,7 @@ void FcManager::handleEvents() {
           else {
             Axe.getLooper().play();
             FcLeds::setLooperLeds(2);
-            _display.print("PLAY                ");
+            _display.print(F("PLAY                "));
           }
           break;
 
@@ -256,13 +256,13 @@ void FcManager::handleEvents() {
             Axe.getLooper().undo();
             FcLeds::setLooperLeds(3);
             FcLeds::turnOffSceneLeds();
-            _display.print("UNDO                ");
+            _display.print(F("UNDO                "));
           }
           break;
 
         // Switch 14 - Swapped to 15 (TUNER ENGAGE)
         case 13:
-          Serial.println("Switch-15 (14) pressed");
+          Serial.println(F("Switch-15 (14) pressed"));
 
           Axe.toggleTuner();
           FcLeds::setTunerLed(Axe.isTunerEngaged());
@@ -278,13 +278,13 @@ void FcManager::handleEvents() {
 
         // Switch 16.
         case 15:
-          //Serial.println("Switch-16 pressed");
+          //Serial.println(F("Switch-16 pressed"));
 
           break;
 
       }
-      Serial.println("-----------");
-      Serial.print("Switch "); Serial.print(currentSwitch + 1); Serial.println(" pressed.");
+      Serial.println(F("-----------"));
+      Serial.print(F("Switch ")); Serial.print(currentSwitch + 1); Serial.println(F(" pressed."));
     }
   }
   
@@ -309,7 +309,7 @@ void FcManager::handleExpressionPedals() {
       Axe.sendControlChange(pedalCC[i], controllerValue[i], MidiChannel);
       
 #ifdef DEBUG
-    Serial.print("ExpPedal-1: "); 
+    Serial.print(F("ExpPedal-1: ")); 
     Serial.println(controllerValue[i]);
 #endif
 
@@ -340,7 +340,7 @@ void FcManager::onPresetChanging(const PresetNumber number) {
 
 void FcManager::onSystemChange() {
   // Display the current tempo at the LCD
-  // lcd.setCursor(0, 3); lcd.print("Tempo: "); lcd.print(Axe.getTempo()); lcd.print("  ");
+  // lcd.setCursor(0, 3); lcd.print(F("Tempo: ")); lcd.print(Axe.getTempo()); lcd.print(F("  "));
 }
 
 //this will only work if realtime sysex is enabled

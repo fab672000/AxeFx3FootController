@@ -5,11 +5,15 @@
 #define DEBUG
 
 // BOARDS
-#define BOARD_ATMEGA           1 /* AVR ATMEGA */
+#define BOARD_SW16_EXP4        1 /* A board with a large number IO's as the AVR ATMEGA */
 #define BOARD_MINI_TESTING     2 /* AVR or other small boards that have at minimum 3K of RAM */
 #define BOARD_T40             11 /* TEENSY 4.0 */
 
-#define BOARD BOARD_ATMEGA
+#define BOARD   BOARD_SW16_EXP4
+
+// The board below in conjunction maybe with a NO_DISPLAY could be used for an even more minimal floorboard with no display feedback that could fit on an Arduino Nano or UNO board
+// #define BOARD  BOARD_MINI_TESTING
+
 
 // DISPLAYS
 // TODO: add more displayys to encapsulate in FcDisplay class
@@ -17,8 +21,9 @@
 #define LIQUID_DISPLAY_I2C    1
 #define ADAFRUIT_LCD_SHIELD   2
 
-/// #define DISPLAY_TYPE LIQUID_DISPLAY_I2C
 #define DISPLAY_TYPE LIQUID_DISPLAY_I2C
+//#define DISPLAY_TYPE ADAFRUIT_LCD_SHIELD
+//#define DISPLAY_TYPE NO_DISPLAY
 
 // MIDI
 const byte MidiChannel = 1;
@@ -32,7 +37,7 @@ const byte MidiChannel = 1;
 #define TAP_TEMPO_LED_DURATION 100
 #define DEFAULT_DEBOUNCE 80
 
-#if (BOARD == BOARD_ATMEGA) 
+#if (BOARD == BOARD_SW16_EXP4) 
 #define MIDI_PORT Serial1
 
 #define NUM_BUTTONS 16

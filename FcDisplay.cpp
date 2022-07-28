@@ -1,5 +1,5 @@
 #include "FcDisplay.h"
-
+#include <Arduino.h>
 // According to AxeEdit III, only 31 chararacters max can be entered
 static char bufPresetName[MaxPresetNameLen + 1];
 static char bufSceneName[MaxSceneNameLen + 1];
@@ -40,21 +40,28 @@ void FcDisplay::init() {
     lcd.begin(16, 2);
     lcd.setBacklight(TEAL);
 #endif
+#if (DISPLAY_TYPE != NO_DISPLAY)
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("AxeFX3 EcoFootCtrl");
+    lcd.print(F("AxeFX3 EcoFootCtrl"));
     lcd.setCursor(0, 1);
-    lcd.print("Waiting connection..");
+    lcd.print(F("Waiting connection.."));
+#endif
 }
 
 /// Clear the display screen
-void FcDisplay::clear() const { lcd.clear(); }
+void FcDisplay::clear() const { 
+#if (DISPLAY_TYPE != NO_DISPLAY)
+  lcd.clear(); 
+#endif
+}
 
 char*  FcDisplay::presetNameString() { return bufPresetName;}
 char*  FcDisplay::sceneNameString()  { return bufSceneName;}
 
 ///
 void  FcDisplay::presetNameToLCD(int presetNum, byte sceneNum) const {
+#if (DISPLAY_TYPE != NO_DISPLAY)
   // Preset Name to LCD display
   int lineCount = 0;
   int posY = 0;
@@ -107,60 +114,67 @@ void  FcDisplay::presetNameToLCD(int presetNum, byte sceneNum) const {
 
   lcd.setCursor(15, 3); lcd.print("S");
   lcd.setCursor(17, 3); lcd.print(sceneNum);
+#endif 
 }
 
 void FcDisplay::displayFineTune(int fineTune) const {
    //char buf[50];
   //snprintf(buf, 50, "TUNING: note=%s string=%d fineTune=%d", note, string, fineTune);
   //Serial.println(buf);
+#if (DISPLAY_TYPE != NO_DISPLAY)
 
   lcd.setCursor(0, 0);
-  lcd.print("                    ");
+  lcd.print(F("                    "));
   //lcd.setCursor(9, 0);
   // lcd.print(note);
   // lcd.print(string);
   //lcd.print("   ");
 
   lcd.setCursor(0, 1);
-  if ( fineTune <= 61)                       {    lcd.print("-                   ");}
-  if ((fineTune >= 62) && (fineTune <= 64))  {    lcd.print("------>>>><<<<------");}
-  if ( fineTune >= 65)                       {    lcd.print("                   +");}
+  if ( fineTune <= 61)                       {    lcd.print(F("                   "));}
+  if ((fineTune >= 62) && (fineTune <= 64))  {    lcd.print(F("----->>>><<<<------"));}
+  if ( fineTune >= 65)                       {    lcd.print(F("                  +"));}
   
   lcd.setCursor(0, 2);  
-  if (fineTune <= 15)                        {    lcd.print(">                   ");}
-  if ((fineTune >= 16) && (fineTune <= 23))  {    lcd.print(">>                  ");}
-  if ((fineTune >= 24) && (fineTune <= 28))  {    lcd.print("->>                 ");}
-  if ((fineTune >= 29) && (fineTune <= 34))  {    lcd.print("-->>                ");}
-  if ((fineTune >= 35) && (fineTune <= 39))  {    lcd.print("--->>               ");}
-  if ((fineTune >= 40) && (fineTune <= 45))  {    lcd.print("---->>              ");}
-  if ((fineTune >= 46) && (fineTune <= 50))  {    lcd.print("----->>             ");}
-  if ((fineTune >= 51) && (fineTune <= 56))  {    lcd.print("------>>            ");}
-  if ((fineTune >= 57) && (fineTune <= 61))  {    lcd.print("------->>           ");}
-  if ((fineTune >= 62) && (fineTune <= 64))  {    lcd.print("------>>>><<<<------");}
-  if ((fineTune >= 65) && (fineTune <= 70))  {    lcd.print("           <<-------");}
-  if ((fineTune >= 71) && (fineTune <= 75))  {    lcd.print("            <<------");}
-  if ((fineTune >= 76) && (fineTune <= 81))  {    lcd.print("             <<-----");}
-  if ((fineTune >= 82) && (fineTune <= 86))  {    lcd.print("              <<----");}
-  if ((fineTune >= 87) && (fineTune <= 92))  {    lcd.print("               <<---");}
-  if ((fineTune >= 93) && (fineTune <= 98))  {    lcd.print("                <<--");}
-  if ((fineTune >= 99) && (fineTune <= 103)) {    lcd.print("                 <<-");}
-  if ((fineTune >= 104) && (fineTune <= 110)){    lcd.print("                  <<");}
-  if (fineTune >= 101)                       {    lcd.print("                   <");}
+  if (fineTune <= 15)                        {    lcd.print(F(">                   "));}
+  if ((fineTune >= 16) && (fineTune <= 23))  {    lcd.print(F(">>                  "));}
+  if ((fineTune >= 24) && (fineTune <= 28))  {    lcd.print(F("->>                 "));}
+  if ((fineTune >= 29) && (fineTune <= 34))  {    lcd.print(F("-->>                "));}
+  if ((fineTune >= 35) && (fineTune <= 39))  {    lcd.print(F("--->>               "));}
+  if ((fineTune >= 40) && (fineTune <= 45))  {    lcd.print(F("---->>              "));}
+  if ((fineTune >= 46) && (fineTune <= 50))  {    lcd.print(F("----->>             "));}
+  if ((fineTune >= 51) && (fineTune <= 56))  {    lcd.print(F("------>>            "));}
+  if ((fineTune >= 57) && (fineTune <= 61))  {    lcd.print(F("------->>           "));}
+  if ((fineTune >= 62) && (fineTune <= 64))  {    lcd.print(F("------>>>><<<<------"));}
+  if ((fineTune >= 65) && (fineTune <= 70))  {    lcd.print(F("           <<-------"));}
+  if ((fineTune >= 71) && (fineTune <= 75))  {    lcd.print(F("            <<------"));}
+  if ((fineTune >= 76) && (fineTune <= 81))  {    lcd.print(F("             <<-----"));}
+  if ((fineTune >= 82) && (fineTune <= 86))  {    lcd.print(F("              <<----"));}
+  if ((fineTune >= 87) && (fineTune <= 92))  {    lcd.print(F("               <<---"));}
+  if ((fineTune >= 93) && (fineTune <= 98))  {    lcd.print(F("                <<--"));}
+  if ((fineTune >= 99) && (fineTune <= 103)) {    lcd.print(F("                 <<-"));}
+  if ((fineTune >= 104) && (fineTune <= 110)){    lcd.print(F("                  <<"));}
+  if (fineTune >= 101)                       {    lcd.print(F("                   <"));}
 
   lcd.setCursor(0, 3);
-  if ( fineTune <= 61)                       {    lcd.print("-                   ");}
-  if ((fineTune >= 62) && (fineTune <= 64))  {    lcd.print("------>>>><<<<------");}
-  if ( fineTune >= 65)                       {    lcd.print("                   +");}
+  if ( fineTune <= 61)                       {    lcd.print(F("-                   "));}
+  if ((fineTune >= 62) && (fineTune <= 64))  {    lcd.print(F("------>>>><<<<------"));}
+  if ( fineTune >= 65)                       {    lcd.print(F("                   +"));}
+#endif
 }
 
 void FcDisplay::displayControllerValue(const char* label, byte value) const {
-  lcd.setCursor(12, 1); lcd.print("   ");
+#if (DISPLAY_TYPE != NO_DISPLAY)
+  lcd.setCursor(12, 1); lcd.print(F("   "));
   lcd.setCursor(0, 1); lcd.print(label); 
   lcd.print(value);
+#endif
 }
   
-void FcDisplay::print(const char* text) const {
-  //lcd.clear();
+void FcDisplay::print(const __FlashStringHelper* text) const {
+#if (DISPLAY_TYPE != NO_DISPLAY)
+//lcd.clear();
   lcd.setCursor(0, 0); 
   lcd.print(text);
+#endif
 }

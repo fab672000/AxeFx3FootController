@@ -5,8 +5,8 @@
 Timer timer;
 
 // Initial state of switch is high due to internal pullup
-static byte leds[NUM_LEDS] = {
-#if (BOARD == BOARD_ATMEGA) 
+const byte PROGMEM leds[NUM_LEDS] = {
+#if (BOARD == BOARD_SW16_EXP4) 
   LED1, LED2, LED3, LED4, LED5, LED6, LED7, LED8, LED9, LED10, LED11, LED12, LED13, LED14, LED15, LED16
 #elif (BOARD == BOARD_MINI_TESTING) 
   LED1, LED2, LED3, LED4
