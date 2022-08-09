@@ -4,10 +4,13 @@
 #include "FcLeds.h"
 #include "SC_Button.h"
 #include "ExpPedals.h"
+#include "FastMux.h"
 
 
+static FastMux mux(2, 3, 4, 5);
 static ProtocolType _protType;
 static FcDisplay _display;
+static FcLeds leds;
 
 static AxeSystem Axe;
 
@@ -38,6 +41,8 @@ static byte SceNumb;
  
 // BUTTONS handling
 
+#ifdef HAS_MUX
+#else
 static byte ButtonPin[NUM_BUTTONS] = {
 #if (BOARD == BOARD_SW16_EXP4) 
   BUTTON1, BUTTON2, BUTTON3, BUTTON4, BUTTON5, BUTTON6, BUTTON7, BUTTON8,
@@ -46,12 +51,17 @@ static byte ButtonPin[NUM_BUTTONS] = {
   BUTTON1, BUTTON2, BUTTON3, BUTTON4
 #endif
 };
+#endif
 
 static Button Buttons[NUM_BUTTONS];
 
 void FcManager::initButtons() {
   for (byte i = 0; i < NUM_BUTTONS; i++) {
+#ifdef HAS_MUX
+    Buttons[i].setPin(BUTTON1_16);
+#else
     Buttons[i].setPin(ButtonPin[i]);
+#endif
     Buttons[i].setDebounceTime(DEFAULT_DEBOUNCE);
     Buttons[i].setPullupEnable(true);
     Buttons[i].begin();
@@ -66,7 +76,7 @@ FcManager::FcManager(ProtocolType protType) {
 void FcManager::begin() {
   
   initButtons();
-  FcLeds::begin();
+  leds.begin();
   _display.init();
 #ifdef DEBUG
   Serial.begin(115200);
@@ -87,7 +97,7 @@ void FcManager::begin() {
 
 /// Controller update handling
 void FcManager::update() {
-  FcLeds::update(); // update the timer
+  leds.update(); // update the timer
   Axe.update();
   handleEvents();
  // handleLayoutChange();
@@ -161,6 +171,7 @@ void FcManager::onSceneName(const SceneNumber number, const char* name, const by
 
 void FcManager::handleEvents() {
   for (byte currentSwitch = 0; currentSwitch < NUM_BUTTONS; currentSwitch++) {
+    mux.select(currentSwitch);
     Buttons[currentSwitch].read();
     if (Buttons[currentSwitch].wasPressed()) {
 
@@ -177,7 +188,7 @@ void FcManager::handleEvents() {
           else
           {
             doSceneChange(currentSwitch + 1);
-            FcLeds::turnOnSceneLed (currentSwitch + 1);
+            leds.turnOnSceneLed (currentSwitch + 1);
           }
           break;
 
@@ -188,7 +199,7 @@ void FcManager::handleEvents() {
           }
           else {
             Axe.sendPresetDecrement();
-            FcLeds::flashLed(currentSwitch, PEDAL_ACTIVE_FLASH );
+            leds.flashLed(currentSwitch, PEDAL_ACTIVE_FLASH );
           }
           break;
 
@@ -202,7 +213,7 @@ void FcManager::handleEvents() {
           }
           else {
             doSceneChange(currentSwitch);
-            FcLeds::turnOnSceneLed (currentSwitch + 1);
+            leds.turnOnSceneLed (currentSwitch + 1);
           }
           break;
 
@@ -213,7 +224,7 @@ void FcManager::handleEvents() {
           }
           else {
             Axe.sendPresetIncrement();
-            FcLeds::flashLed( currentSwitch, PEDAL_ACTIVE_FLASH );
+            leds.flashLed( currentSwitch, PEDAL_ACTIVE_FLASH );
           }
           break;
 
@@ -224,8 +235,8 @@ void FcManager::handleEvents() {
           }
           else {
             Axe.getLooper().record();
-            FcLeds::setLooperLeds(1);
-            //FcLeds::turnOffSceneLeds();
+            leds.setLooperLeds(1);
+            //leds.turnOffSceneLeds();
             _display.print(F("RECORD              "));
 
 
@@ -242,7 +253,7 @@ void FcManager::handleEvents() {
           }
           else {
             Axe.getLooper().play();
-            FcLeds::setLooperLeds(2);
+            leds.setLooperLeds(2);
             _display.print(F("PLAY                "));
           }
           break;
@@ -254,8 +265,8 @@ void FcManager::handleEvents() {
           }
           else {
             Axe.getLooper().undo();
-            FcLeds::setLooperLeds(3);
-            FcLeds::turnOffSceneLeds();
+            leds.setLooperLeds(3);
+            leds.turnOffSceneLeds();
             _display.print(F("UNDO                "));
           }
           break;
@@ -265,7 +276,7 @@ void FcManager::handleEvents() {
           Serial.println(F("Switch-15 (14) pressed"));
 
           Axe.toggleTuner();
-          FcLeds::setTunerLed(Axe.isTunerEngaged());
+          leds.setTunerLed(Axe.isTunerEngaged());
 
           break;
 
@@ -321,7 +332,7 @@ void FcManager::handleExpressionPedals() {
 }
 
 void FcManager::doSceneChange(byte scene) {
-  FcLeds::turnOnSceneLed(scene);
+  leds.turnOnSceneLed(scene);
   Axe.sendSceneChange(scene);
   Axe.update();
 }
@@ -346,5 +357,5 @@ void FcManager::onSystemChange() {
 //this will only work if realtime sysex is enabled
 void FcManager::onTapTempo() {
   // Flashes a LED on tempo
-  // FcLeds::flashLed( 3, TAP_TEMPO_LED_DURATION ); // pending assign to correspondent tempo led
+  // leds.flashLed( 3, TAP_TEMPO_LED_DURATION ); // pending assign to correspondent tempo led
 }

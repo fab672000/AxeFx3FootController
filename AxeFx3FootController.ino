@@ -9,7 +9,11 @@
 // Other lib dependencies (for the LCD display and timer):
 //  https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 //  https://github.com/JChristensen/Timer
-
+// 
+// by default, buttons are read from the 4067 on pins 2,3,4,5 and button pin is 6.
+//    also data  LEDS 595 shifters are mapped on pins data = 7,clock = 8, latch = 9
+// if not using 4067 and/or 595 shifters, comment out teh HAS_MUX and/or the HAS_LED_SHITERS definitions in config.h
+//
 #include "config.h"
 #include "FcManager.h"
 static FcManager footController(ProtocolType::MIDI_AFX3);

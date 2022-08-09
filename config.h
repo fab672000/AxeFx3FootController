@@ -40,27 +40,33 @@ const byte MidiChannel = 1;
 #if (BOARD == BOARD_SW16_EXP4) 
 #define MIDI_PORT Serial1
 
-#define NUM_BUTTONS 16
-#define BUTTON1 22
-#define BUTTON2 24
-#define BUTTON3 26
-#define BUTTON4 28
-#define BUTTON5 30
-#define BUTTON6 32
-#define BUTTON7 34
-#define BUTTON8 36
-#define BUTTON9 38
-#define BUTTON10 40
-#define BUTTON11 42
-#define BUTTON12 44
-#define BUTTON13 46
-#define BUTTON14 50
-#define BUTTON15 48
-#define BUTTON16 52
+// comment out the line below to get direct buttons mapping (no CD4067 mux)
+#define HAS_MUX
 
-#define NUM_LEDS 16
-#define MAX_SCENE_LED 9
+// Comment out the line below if not use led 74[a]hct595 led shifters
+#define HAS_LED_SHIFTERS
+#ifdef HAS_LED_SHIFTERS
 
+#define LED_DATA 7
+#define LED_CLOCK 8
+#define LED_LATCH 9
+#define LED1 0
+#define LED2 1
+#define LED3 2
+#define LED4 3
+#define LED5 4
+#define LED6 5
+#define LED7 6
+#define LED8 7
+#define LED9 8
+#define LED10 9
+#define LED11 10
+#define LED12 11
+#define LED13 12
+#define LED14 13
+#define LED15 14
+#define LED16 15
+#else
 #define LED1 23
 #define LED2 25
 #define LED3 27
@@ -77,6 +83,32 @@ const byte MidiChannel = 1;
 #define LED14 49
 #define LED15 51
 #define LED16 53
+#endif
+
+#define NUM_BUTTONS 16
+
+#ifdef HAS_MUX
+#define BUTTON1_16 6
+#else
+#define BUTTON1 22
+#define BUTTON2 24
+#define BUTTON3 26
+#define BUTTON4 28
+#define BUTTON5 30
+#define BUTTON6 32
+#define BUTTON7 34
+#define BUTTON8 36
+#define BUTTON9 38
+#define BUTTON10 40
+#define BUTTON11 42
+#define BUTTON12 44
+#define BUTTON13 46
+#define BUTTON14 50
+#define BUTTON15 48
+#define BUTTON16 52
+#endif
+#define NUM_LEDS 16
+#define MAX_SCENE_LED 9
 
 #elif (BOARD == BOARD_MINI_TESTING) /* for quick testing only 4 buttons mapping */
 #define MIDI_PORT Serial
