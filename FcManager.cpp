@@ -2,7 +2,7 @@
 #include "FcManager.h"
 #include "FcDisplay.h"
 #include "FcLeds.h"
-#include "SC_Button.h"
+#include <Bounce2.h>
 #include "ExpPedals.h"
 #include "FastMux.h"
 
@@ -41,30 +41,29 @@ static byte SceNumb;
  
 // BUTTONS handling
 
-#ifdef HAS_MUX
-#else
 static byte ButtonPin[NUM_BUTTONS] = {
-#if (BOARD == BOARD_SW16_EXP4) 
+#ifdef HAS_MUX
+  BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,
+  BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16
+#elif (BOARD == BOARD_SW16_EXP4) 
   BUTTON1, BUTTON2, BUTTON3, BUTTON4, BUTTON5, BUTTON6, BUTTON7, BUTTON8,
   BUTTON9, BUTTON10, BUTTON11, BUTTON12, BUTTON13, BUTTON14, BUTTON15, BUTTON16
 #elif (BOARD == BOARD_MINI_TESTING) 
   BUTTON1, BUTTON2, BUTTON3, BUTTON4
 #endif
 };
-#endif
 
-static Button Buttons[NUM_BUTTONS];
+static Bounce Buttons[NUM_BUTTONS];
 
 void FcManager::initButtons() {
   for (byte i = 0; i < NUM_BUTTONS; i++) {
+    pinMode(ButtonPin[i], INPUT_PULLUP);
+
 #ifdef HAS_MUX
-    Buttons[i].setPin(BUTTON1_16);
-#else
-    Buttons[i].setPin(ButtonPin[i]);
+    mux.select(i);
 #endif
-    Buttons[i].setDebounceTime(DEFAULT_DEBOUNCE);
-    Buttons[i].setPullupEnable(true);
-    Buttons[i].begin();
+    Buttons[i].attach(ButtonPin[i], INPUT_PULLUP);
+    Buttons[i].interval(DEFAULT_DEBOUNCE);
   }
 }
 
@@ -84,7 +83,7 @@ void FcManager::begin() {
   
   Axe.begin(MIDI_PORT); // TODO in future: implement more midi devices not necesarily assuming a direct serial connection
   Axe.registerPresetChangeCallback(onPresetChange);
-  // Axe.registerPresetChangingCallback(onPresetChanging);
+  Axe.registerPresetChangingCallback(onPresetChanging);
   Axe.registerSystemChangeCallback(onSystemChange);
   Axe.registerSceneNameCallback(onSceneName);
   Axe.registerTunerStatusCallback(onTunerStatus);
@@ -109,9 +108,9 @@ void FcManager::update() {
 /// as an example the tuner + the loop functiona could be remapped on the second row
 void FcManager::handleLayoutChange(){
     // long press function to Switch 11
-  if (Buttons[12].pressedFor(2000)) {
-    PL_("Switch long pressed");
-  }
+//  if (Buttons[12].pressedFor(2000)) {
+//    PL_("Switch long pressed");
+//  }
 }
 
 void FcManager::notifyPresetChanged(AxePreset preset) {
@@ -122,9 +121,48 @@ void FcManager::notifyPresetChanged(AxePreset preset) {
   }
 }
 
+void FcManager::onSceneName(const SceneNumber number, const char* name, const byte length) {
+  if (strcmp(scenes[number-1].name,  name)==0) return;
+ 
+  Serial.print(F("onSceneName(): "));
+  Serial.print(number);
+  Serial.print(F(": "));
+  Serial.println(name);
+
+  //Record current scene in the list  scenes[number-1].number = number;
+  scenes[number-1].name = name;
+
+  //Request the first scene that we don't have yet.
+  //Only request one at a time to avoid filling up RX buffer
+  for (byte i=0; i<NUM_SCENES; i++) {
+    if (scenes[i].number == -1) {
+      Axe.requestSceneName(i+1);
+      break;
+    }
+  }
+}
+
+// Fetch All Scene Names
+void FcManager::onPresetChanging(const PresetNumber number) {
+  //Reset the scene list for the new preset
+  for (byte i=0; i<NUM_SCENES; i++) {
+    scenes[i].number = -1;
+  }
+
+  if(number==PresetNumb) return;
+  Serial.print(F("onPresetChanging(): "));
+  Serial.println(number);
+    
+  }
+
 void FcManager::onPresetChange(AxePreset preset) {
   PresetNumb = preset.getPresetNumber();
   preset.copyPresetName(FcDisplay::presetNameString(), MaxPresetNameLen + 1);
+  Serial.print(F("onPresetChange(): "));
+  Serial.print(PresetNumb);
+  Serial.print(F(": "));
+  
+  Serial.println(preset.getPresetName());
 
   SceNumb = preset.getSceneNumber();
   preset.copySceneName(FcDisplay::sceneNameString(), MaxSceneNameLen + 1);
@@ -138,42 +176,18 @@ void FcManager::onTunerData(const char *note, const byte string, const byte fine
 void FcManager::onTunerStatus(bool engaged) {
   if (!Axe.isTunerEngaged())
   {
-    Axe.update();
     _display.clear();
     _display.presetNameToLCD(PresetNumb, SceNumb);
   }
 }
 
-void FcManager::onSceneName(const SceneNumber number, const char* name, const byte length) {
-  if (number == 1) {
-    Serial.println(F("\n+++++++++++**+++++++++++\n\n"));
-  }
-
-  Serial.print(F("onSceneName(): "));
-  Serial.print(number);
-  Serial.print(F(": "));
-  Serial.println(name);
-
-  //Record current scene in the list
-  scenes[number-1].number = number;
-  scenes[number-1].name = name;
-
-  //Request the first scene that we don't have yet.
-  //Only request one at a time to avoid filling up RX buffer
-  for (byte i=0; i<NUM_SCENES; i++) {
-    if (scenes[i].number == -1) {
-      Axe.requestSceneName(i+1);
-      break;
-    }
-  }
-
-}
-
 void FcManager::handleEvents() {
   for (byte currentSwitch = 0; currentSwitch < NUM_BUTTONS; currentSwitch++) {
+#ifdef HAS_MUX
     mux.select(currentSwitch);
-    Buttons[currentSwitch].read();
-    if (Buttons[currentSwitch].wasPressed()) {
+#endif
+    Buttons[currentSwitch].update();
+    if (Buttons[currentSwitch].fell()) {
 
       switch ( currentSwitch ) {
 
@@ -335,14 +349,6 @@ void FcManager::doSceneChange(byte scene) {
   leds.turnOnSceneLed(scene);
   Axe.sendSceneChange(scene);
   Axe.update();
-}
-
-// Fetch All Scene Names
-void FcManager::onPresetChanging(const PresetNumber number) {
-  //Reset the scene list for the new preset
-  for (byte i=0; i<NUM_SCENES; i++) {
-    scenes[i].number = -1;
-  }
 }
 
 // =======================================================================================================

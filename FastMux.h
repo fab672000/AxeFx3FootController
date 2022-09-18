@@ -1,6 +1,8 @@
 #pragma once
 #include <Arduino.h>
 
+constexpr uint16_t MUX_CMOS_DELAY_US = 10;
+
 class FastMux
 {
  public:
@@ -16,6 +18,7 @@ class FastMux
     begin();
   }
   
+  
   /// clear all address bits to start with a known previous state
   void clear()
   {
@@ -24,6 +27,7 @@ class FastMux
     digitalWriteFast(_a2, 0);
     if(_numBits>3) digitalWriteFast(_a3, 0);
     _previousAddr = 0;
+    delayMicroseconds(MUX_CMOS_DELAY_US);
   }
   
   /// Optimized addr selection, cached previous addr will allow to write an addr bit only if it is changed
@@ -32,7 +36,6 @@ class FastMux
     byte a = addr;
     byte b = _previousAddr;
     bool dirtyFlag = false;
-    
     for (byte n=0; n< _numBits; n++)
     {
       byte val = a & 0x01 ;
@@ -43,9 +46,9 @@ class FastMux
       a >>= 1; // shift right
       b >>= 1; // shift right
     }
-    if (dirtyFlag) {
+    if(dirtyFlag) {
       _previousAddr = addr;
-      delayNanoseconds(350); // 74HC4067 74HC4051 Sx LOW or HIGH max propagation delay around 3.3V  + extra safety margin
+      delayMicroseconds(MUX_CMOS_DELAY_US);
     }
   }
   

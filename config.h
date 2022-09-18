@@ -35,7 +35,7 @@ const byte MidiChannel = 1;
 
 #define PEDAL_ACTIVE_FLASH 50 // Delay for flash when pedal is pressed
 #define TAP_TEMPO_LED_DURATION 100
-#define DEFAULT_DEBOUNCE 80
+#define DEFAULT_DEBOUNCE 40
 
 #if (BOARD == BOARD_SW16_EXP4) 
 #define MIDI_PORT Serial1

@@ -5,10 +5,10 @@
 // More info: https://forum.fractalaudio.com/threads/diy-axe-fx-foot-controller-for-50-open-project.119882/
 // Reusing tysonlt AxeFx Control Libraries:
 //  https://github.com/tysonlt/AxeFxControl
-//  https://github.com/tysonlt/Simple_Controls
 // Other lib dependencies (for the LCD display and timer):
 //  https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 //  https://github.com/JChristensen/Timer
+//  https://github.com/thomasfredericks/Bounce2
 // 
 // by default, buttons are read from the 4067 on pins 2,3,4,5 and button pin is 6.
 //    also data  LEDS 595 shifters are mapped on pins data = 7,clock = 8, latch = 9
@@ -23,5 +23,5 @@ void setup() {
 }
 
 void loop() {
-  footController.update();
+    footController.update();
 }

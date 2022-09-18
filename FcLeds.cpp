@@ -65,7 +65,7 @@ void FcLeds::updateLeds(uint16_t val)
     if (val!=lastLedVal)
     {
       lastLedVal = val;
-#ifdef DEBUG
+#if 0 // def DEBUG
         Serial.print("Updating Leds: ");
         Serial.println(val,HEX);
 #endif
