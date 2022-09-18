@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 // DEBUG Mode:
-#define DEBUG
+//#define DEBUG
 
 // BOARDS
 #define BOARD_SW16_EXP4        1 /* A board with a large number IO's as the AVR ATMEGA */
