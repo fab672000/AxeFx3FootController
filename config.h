@@ -7,7 +7,11 @@
 // BOARDS
 #if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41) || defined(KINETISL) || defined(KINETISK)
 # define TEENSY_BOARD
+#else
+// make the non optimized arduinos still work for digitalWriteFast
+#define digitalWriteFast digitalWrite
 #endif
+
 #define BOARD_SW16_EXP4        1 /* A board with a large number IO's or with multiplexers and shifters */
 #define BOARD_MINI_TESTING     2 /* AVR or other small boards that have at minimum 3K of RAM */
 #define BOARD   BOARD_SW16_EXP4

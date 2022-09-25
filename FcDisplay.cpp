@@ -180,6 +180,7 @@ void FcDisplay::clearControllerValue(const char* label, byte num) const {
   lcd.print(F("            "));
 #endif  
 }
+
 void FcDisplay::print(const __FlashStringHelper* text) const {
 #if (DISPLAY_TYPE != NO_DISPLAY)
 //lcd.clear();
