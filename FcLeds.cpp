@@ -1,8 +1,6 @@
 #include "config.h"
 #include "FcLeds.h"
-#include <Timer.h>
-
-static Timer timer;
+#include "TimerUtils.h"
 
 // Initial state of switch is high due to internal pullup
 const byte PROGMEM leds[NUM_LEDS] = {
@@ -26,7 +24,7 @@ FcLeds::FcLeds()
 }
 
 void FcLeds::update() {
-  timer.update();
+  TimerUtils::GetTimer().update();
 }
 
 void FcLeds::begin()
@@ -100,7 +98,7 @@ void FcLeds::testAllLeds(uint16_t del)
 void FcLeds::flashLed( byte ledNum, int flashDelay ) {
   _currentFlashLed = ledNum;
   updateLed(ledNum, HIGH);
-  timer.after(flashDelay, turnOffFlashingLed);
+  TimerUtils::GetTimer().after(flashDelay, turnOffFlashingLed);
 }
 
 void FcLeds::turnOffSceneLeds() {

@@ -1,5 +1,7 @@
-#include "FcDisplay.h"
 #include <Arduino.h>
+#include "FcDisplay.h"
+#include "TimerUtils.h"
+
 // According to AxeEdit III, only 31 chararacters max can be entered
 static char bufPresetName[MaxPresetNameLen + 1];
 static char bufSceneName[MaxSceneNameLen + 1];
@@ -163,14 +165,21 @@ void FcDisplay::displayFineTune(int fineTune) const {
 #endif
 }
 
-void FcDisplay::displayControllerValue(const char* label, byte value) const {
+void FcDisplay::displayControllerValue(const char* label, byte num, byte value) const {
 #if (DISPLAY_TYPE != NO_DISPLAY)
-  lcd.setCursor(12, 1); lcd.print(F("   "));
-  lcd.setCursor(0, 1); lcd.print(label); 
-  lcd.print(value);
+  char buff[16];
+  sprintf(buff, "%s-%d %03d", label, num, value); // buff will be "01238"
+  lcd.setCursor(0, 1); 
+  lcd.print(buff); 
 #endif
 }
-  
+
+void FcDisplay::clearControllerValue(const char* label, byte num) const {
+#if (DISPLAY_TYPE != NO_DISPLAY) 
+  lcd.setCursor(0, 1); 
+  lcd.print(F("            "));
+#endif  
+}
 void FcDisplay::print(const __FlashStringHelper* text) const {
 #if (DISPLAY_TYPE != NO_DISPLAY)
 //lcd.clear();

@@ -5,10 +5,11 @@
 //#define DEBUG
 
 // BOARDS
-#define BOARD_SW16_EXP4        1 /* A board with a large number IO's as the AVR ATMEGA */
+#if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41) || defined(KINETISL) || defined(KINETISK)
+# define TEENSY_BOARD
+#endif
+#define BOARD_SW16_EXP4        1 /* A board with a large number IO's or with multiplexers and shifters */
 #define BOARD_MINI_TESTING     2 /* AVR or other small boards that have at minimum 3K of RAM */
-#define BOARD_T40             11 /* TEENSY 4.0 */
-
 #define BOARD   BOARD_SW16_EXP4
 
 // The board below in conjunction maybe with a NO_DISPLAY could be used for an even more minimal floorboard with no display feedback that could fit on an Arduino Nano or UNO board
@@ -32,6 +33,7 @@ const byte MidiChannel = 1;
 #define PL_ Serial.println
 
 #define AXE_REFRESH_RATE 1500
+constexpr unsigned AUTO_CLEAR_CONTROL_MS = 2000;
 
 #define PEDAL_ACTIVE_FLASH 50 // Delay for flash when pedal is pressed
 #define TAP_TEMPO_LED_DURATION 100
@@ -86,6 +88,8 @@ const byte MidiChannel = 1;
 #endif
 
 #define NUM_BUTTONS 16
+// Comment this line below if you use the 
+#define LINEAR_BUTTON MAPPING
 
 #ifdef HAS_MUX
 #define BUTTON1_16 6

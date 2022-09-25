@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-
 /**
  * Leds handler class for the foot controller
  */
@@ -22,7 +21,6 @@ class FcLeds {
   static void updateLed(byte ledNum, byte state);
   static void turnOffFlashingLed(); // must be static because of timer cb limitation
   static void updateLeds(uint16_t value);
-  
  private:
   static uint16_t _ledsState; // value of all leds 0=off, 1=on
 };

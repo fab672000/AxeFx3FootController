@@ -5,7 +5,7 @@
 #include <Bounce2.h>
 #include "ExpPedals.h"
 #include "FastMux.h"
-
+#include "TimerUtils.h"
 
 static FastMux mux(2, 3, 4, 5);
 static ProtocolType _protType;
@@ -150,9 +150,10 @@ void FcManager::onPresetChanging(const PresetNumber number) {
   }
 
   if(number==PresetNumb) return;
+#ifdef DEBUG
   Serial.print(F("onPresetChanging(): "));
   Serial.println(number);
-    
+#endif  
   }
 
 void FcManager::onPresetChange(AxePreset preset) {
@@ -314,10 +315,14 @@ void FcManager::handleEvents() {
   }
   
   // TODO:
-  // handleExpressionPedals();
+  handleExpressionPedals();
 }
 
 void FcManager::handleExpressionPedals() {
+  static unsigned long lastTimeActive=0UL;
+  static bool mustClear = false;
+  unsigned long currentTime = millis();
+  
   //This line smooths the measured values. The measured values of an unused potentiometer can jumb back and forth between values.
   // Without the smoothing the controller would constantly send CC data, which I don't want. There are other ways to smooth, but this one works best for me.
   // The values 0.4 and 0.6 need to add up to 1.0. 0.4 and 0.6 gave the best results. Change to taste!
@@ -334,11 +339,18 @@ void FcManager::handleExpressionPedals() {
       Axe.sendControlChange(pedalCC[i], controllerValue[i], MidiChannel);
       
 #ifdef DEBUG
-    Serial.print(F("ExpPedal-1: ")); 
+    Serial.print(F("ExpPedal-")); 
+    Serial.print(i); 
+    Serial.print(":"); 
     Serial.println(controllerValue[i]);
 #endif
 
-      _display.displayControllerValue("ExpPedal-1", controllerValue[i]);
+      _display.displayControllerValue("Exp", i+1, controllerValue[i]);
+      lastTimeActive = currentTime;
+      mustClear = true;
+    } else if (mustClear && abs(currentTime-lastTimeActive)>AUTO_CLEAR_CONTROL_MS) {
+        _display.clearControllerValue("Exp", 0);
+        mustClear = false;
     }
     controllerValueOld[i] = controllerValue[i];
     pedalValueOld[i] = pedalValue[i];
