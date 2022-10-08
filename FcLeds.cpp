@@ -73,7 +73,7 @@ void FcLeds::updateLeds(uint16_t val)
     shiftOut(LED_DATA, LED_CLOCK, MSBFIRST, (val>>8) & 0xff);  // MSB
     shiftOut(LED_DATA, LED_CLOCK, MSBFIRST, val & 0xff);       // LSB
     //take the latch pin high so that all the LEDs will update:    
-    digitalWrite(LED_LATCH, HIGH);
+    digitalWriteFast(LED_LATCH, HIGH);
 }
 
 void FcLeds::testAllLeds(uint16_t del)

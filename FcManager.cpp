@@ -74,12 +74,12 @@ FcManager::FcManager(ProtocolType protType) {
 /// Controller initialization
 void FcManager::begin() {
   
-  initButtons();
   leds.begin();
   _display.init();
 #ifdef DEBUG
   Serial.begin(115200);
 #endif
+  initButtons();
   
   Axe.begin(MIDI_PORT); // TODO in future: implement more midi devices not necesarily assuming a direct serial connection
   Axe.registerPresetChangeCallback(onPresetChange);
@@ -322,7 +322,7 @@ void FcManager::handleExpressionPedals() {
   static unsigned long lastTimeActive=0UL;
   static bool mustClear = false;
   unsigned long currentTime = millis();
-  
+
   //This line smooths the measured values. The measured values of an unused potentiometer can jumb back and forth between values.
   // Without the smoothing the controller would constantly send CC data, which I don't want. There are other ways to smooth, but this one works best for me.
   // The values 0.4 and 0.6 need to add up to 1.0. 0.4 and 0.6 gave the best results. Change to taste!
@@ -339,12 +339,10 @@ void FcManager::handleExpressionPedals() {
       Axe.sendControlChange(pedalCC[i], controllerValue[i], MidiChannel);
       
 #ifdef DEBUG
-    Serial.print(F("ExpPedal-")); 
-    Serial.print(i); 
-    Serial.print(":"); 
-    Serial.println(controllerValue[i]);
+      char buffer[32];
+      sprintf(buffer, "%6ld:ExpPedal-%d:%d", deltaTime, i, anaValue);
+      Serial.println(buffer);
 #endif
-
       _display.displayControllerValue("Exp", i+1, controllerValue[i]);
       lastTimeActive = currentTime;
       mustClear = true;

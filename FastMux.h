@@ -1,5 +1,5 @@
 #pragma once
-#include <Arduino.h>
+#include "config.h"
 
 constexpr uint16_t MUX_CMOS_DELAY_US = 10;
 

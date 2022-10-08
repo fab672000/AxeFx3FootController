@@ -19,7 +19,6 @@
 // The board below in conjunction maybe with a NO_DISPLAY could be used for an even more minimal floorboard with no display feedback that could fit on an Arduino Nano or UNO board
 // #define BOARD  BOARD_MINI_TESTING
 
-
 // DISPLAYS
 // TODO: add more displayys to encapsulate in FcDisplay class
 #define NO_DISPLAY            0
