@@ -168,6 +168,7 @@ void FcManager::onPresetChange(AxePreset preset) {
   SceNumb = preset.getSceneNumber();
   preset.copySceneName(FcDisplay::sceneNameString(), MaxSceneNameLen + 1);
   _display.presetNameToLCD(PresetNumb, SceNumb);
+  leds.turnOnSceneLed(SceNumb);
 }
 
 void FcManager::onTunerData(const char *note, const byte string, const byte fineTune) {
@@ -228,7 +229,7 @@ void FcManager::handleEvents() {
           }
           else {
             doSceneChange(currentSwitch);
-            leds.turnOnSceneLed (currentSwitch + 1);
+            leds.turnOnSceneLed (currentSwitch);
           }
           break;
 

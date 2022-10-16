@@ -12,7 +12,7 @@ class FcLeds {
 
   void flashLed( byte ledPin, int flashDelay );
   void turnOffSceneLeds(); 
-  void turnOnSceneLed(byte led);
+  void turnOnSceneLed(byte led); // scene value is : 1-8
   void setTunerLed(bool state);
   void setLooperLeds (int numLed);
   

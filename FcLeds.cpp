@@ -38,7 +38,7 @@ void FcLeds::begin()
   pinMode(LED_DATA, OUTPUT);
   pinMode(LED_CLOCK, OUTPUT);
   pinMode(LED_LATCH, OUTPUT);
-  testAllLeds(250);
+  testAllLeds(150);
 #endif
 }
 
@@ -78,20 +78,15 @@ void FcLeds::updateLeds(uint16_t val)
 
 void FcLeds::testAllLeds(uint16_t del)
 {
-  for (byte n=0; n<3; n++)
-  {
-    for (uint16_t  i= 0; i< NUM_LEDS; i++) {
-      updateLed(i, i & 1 ? HIGH : LOW);
-    }
+  for (uint16_t  i= 0; i< NUM_LEDS; i++) {
+    updateLed(i, HIGH);
     delay(del);
-
-    for (uint16_t  i= 0; i< NUM_LEDS; i++) {
-      updateLed(i, i & 1 ? LOW : HIGH);
-    }  
-    delay(del);
+    updateLed(i, LOW);
   }
-    updateLeds(0);
-}void FcLeds::turnOffFlashingLed() {
+  updateLeds(0);
+}
+
+void FcLeds::turnOffFlashingLed() {
   updateLed(_currentFlashLed, LOW );
 }
 
