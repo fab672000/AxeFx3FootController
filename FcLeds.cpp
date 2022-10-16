@@ -104,7 +104,8 @@ void FcLeds::turnOffSceneLeds() {
 
 void FcLeds::turnOnSceneLed(byte sceneNum) {
   turnOffSceneLeds();
-  updateLed(sceneNum - 1, HIGH);
+  
+  updateLed(sceneNum >4 ? sceneNum : sceneNum - 1, HIGH);
 }
 
 void FcLeds::setTunerLed(bool state) {

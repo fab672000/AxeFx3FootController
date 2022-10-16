@@ -219,7 +219,7 @@ void FcManager::handleEvents() {
           }
           break;
 
-        // Switch 6-9 (Scene 5-9)
+        // Switch 5-8 (Scene 5-8)
         case 5:
         case 6:
         case 7:
