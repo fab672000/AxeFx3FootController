@@ -6,6 +6,7 @@
 #include "ExpPedals.h"
 #include "FastMux.h"
 #include "TimerUtils.h"
+#include "SwitchHoldManager.h"
 
 static FastMux mux(2, 3, 4, 5);
 static ProtocolType _protType;
@@ -151,8 +152,10 @@ void FcManager::onPresetChanging(const PresetNumber number) {
 
   if(number==PresetNumb) return;
 #ifdef DEBUG
-  Serial.print(F("onPresetChanging(): "));
-  Serial.println(number);
+  if (number>=0) {
+    Serial.print(F("onPresetChanging(): "));
+    Serial.println(number);
+  }
 #endif  
   }
 
@@ -198,6 +201,9 @@ int FcManager::sceneFromSwitchValue(int sw) {
   return 1;
 }
 
+
+static SwitchHoldManager HoldMgr;
+
 void FcManager::handleEvents() {
   static bool looperPlaying = false;
   static int lastScene = -1;
@@ -205,49 +211,65 @@ void FcManager::handleEvents() {
   
   int scene; // +1 if second scene row
   bool isTunerEngaged;
+  long nowTimeMs = millis();
   
-  for (byte currentSwitch = 0; currentSwitch < NUM_BUTTONS; currentSwitch++) {
+  for (byte switchIndex = 0; switchIndex < NUM_BUTTONS; switchIndex++) {
 #ifdef HAS_MUX
-    mux.select(currentSwitch);
+    mux.select(switchIndex);
 #endif
-    Buttons[currentSwitch].update();
-    if (Buttons[currentSwitch].fell()) {
+    auto& currentButton =  Buttons[switchIndex];
+    currentButton.update();
+    
+    // handle hold durations
+    const auto  fellState = currentButton.fell();
+    const auto  roseState = currentButton.rose();
+    HoldMgr.update(switchIndex, fellState, roseState, nowTimeMs);
+    const auto  changed =  HoldMgr.hasChanged(switchIndex);
+    const auto presetOffset = HoldMgr.getPresetAutoRepeatAmplitude(switchIndex);
+    
+    // First handle autorepeat keys:
+    if (switchIndex == SWITCH_PRESET_DEC || switchIndex == SWITCH_PRESET_INC) {
+      auto newPreset = switchIndex == SWITCH_PRESET_DEC ? 
+        (PresetNumb + 1024 - presetOffset) % 1024 :
+        (PresetNumb + presetOffset) % 1024;
+
+      if (fellState || changed) {
+        if (switchIndex == SWITCH_PRESET_DEC ) {
+          if (presetOffset == 1)  Axe.sendPresetDecrement(); else Axe.sendPresetChange(newPreset);
+        } else {
+          if (presetOffset == 1)  Axe.sendPresetIncrement(); else Axe.sendPresetChange(newPreset);
+        }
+        PresetNumb = newPreset;
+
+        leds.flashLed(switchIndex, PEDAL_ACTIVE_FLASH );
+        if(lastLoopPreset >= 0) {
+          leds.setLooperLeds( PresetNumb == lastLoopPreset && looperPlaying ? 2 : 0);
+        }
+
+        HoldMgr.clearChanged(switchIndex);
+      }
+    }
+
+    else if (fellState) {
+
       isTunerEngaged = Axe.isTunerEngaged();
       
-      if (currentSwitch == SWITCH_TUNER || isTunerEngaged ) // tuner switch
-      {
+      if (switchIndex == SWITCH_TUNER || isTunerEngaged ) {
             Axe.toggleTuner();
            isTunerEngaged = Axe.isTunerEngaged();
       }
-      switch ( currentSwitch ) {
+      switch ( switchIndex ) {
 
         // Switches 1-4, 6-9 (Scene 1-8)
         case SWITCH_S1: case SWITCH_S2: case SWITCH_S3: case SWITCH_S4:
         case SWITCH_S5: case SWITCH_S6: case SWITCH_S7: case SWITCH_S8:
-            scene = sceneFromSwitchValue(currentSwitch);
+            scene = sceneFromSwitchValue(switchIndex);
             doSceneChange(scene );
             leds.turnOnSceneLed (scene );
             lastScene = scene;
             leds.setLooperLeds(0);
           break;
           
-        case SWITCH_PRESET_DEC: 
-        case SWITCH_PRESET_INC:
-          if(currentSwitch == SWITCH_PRESET_DEC ) {
-            Axe.sendPresetDecrement();
-            PresetNumb--;
-          } else {
-            Axe.sendPresetIncrement();
-            PresetNumb++;
-          }
-
-          leds.flashLed(currentSwitch, PEDAL_ACTIVE_FLASH );
-          if(lastLoopPreset>=0)
-          {
-            leds.setLooperLeds( PresetNumb == lastLoopPreset && looperPlaying ? 2 : 0);
-          }
-          break;
-
         case SWITCH_LOOPER_RECORD:
             
             Axe.getLooper().record();
@@ -282,17 +304,13 @@ void FcManager::handleEvents() {
         case SWITCH_TAP_TEMPO: // tap tempo
           Axe.sendTap();
           break;
-
-        default:
-          break;
-
       }
 
       leds.setTunerLed(isTunerEngaged);
       Serial.println(F("-----------"));
-      Serial.print(F("Switch ")); Serial.print(currentSwitch + 1); Serial.println(F(" pressed."));
+      Serial.print(F("Switch ")); Serial.print(switchIndex + 1); Serial.println(F(" pressed."));
 
-    } // if Buttons[currentSwitch].fell()) 
+    } // if currentButton.fell()) 
   } // for
   
   // TODO:
@@ -318,12 +336,6 @@ void FcManager::handleExpressionPedals() {
     if (controllerValue[i]!=0 && controllerValue[i] != controllerValueOld[i]) {
 
       Axe.sendControlChange(pedalCC[i], controllerValue[i], MidiChannel);
-      
-#ifdef DEBUG
-      char buffer[32];
-      sprintf(buffer, "%6ld:ExpPedal-%d:%d", deltaTime, i, anaValue);
-      Serial.println(buffer);
-#endif
       _display.displayControllerValue("Exp", i+1, controllerValue[i]);
       lastTimeActive = currentTime;
       mustClear = true;

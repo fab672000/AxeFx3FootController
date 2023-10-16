@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 // DEBUG Mode:
-//#define DEBUG
+#define DEBUG
 
 // BOARDS
 #if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41) || defined(KINETISL) || defined(KINETISK)
