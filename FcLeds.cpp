@@ -116,8 +116,8 @@ void FcLeds::setTunerLed(bool state) {
 
 void FcLeds::setLooperLeds (int numLed) {
 #if NUM_LEDS >= 13
-    updateLed(LED11, numLed == 1 ? HIGH : LOW);
-    updateLed(LED12, numLed == 2 ? HIGH : LOW);
-    updateLed(LED13, numLed == 3 ? HIGH : LOW);
+    updateLed(LED10, numLed == 1 ? HIGH : LOW);
+    updateLed(LED11, numLed == 2 ? HIGH : LOW);
+    updateLed(LED12, numLed == 3 ? HIGH : LOW);
 #endif
 }

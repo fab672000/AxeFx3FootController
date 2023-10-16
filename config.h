@@ -48,6 +48,10 @@ constexpr unsigned AUTO_CLEAR_CONTROL_MS = 2000;
 // comment out the line below to get direct buttons mapping (no CD4067 mux)
 #define HAS_MUX
 
+#define NUM_LEDS 16
+#define MAX_SCENE_LED 9
+
+
 // Comment out the line below if not use led 74[a]hct595 led shifters
 #define HAS_LED_SHIFTERS
 #ifdef HAS_LED_SHIFTERS
@@ -55,6 +59,7 @@ constexpr unsigned AUTO_CLEAR_CONTROL_MS = 2000;
 #define LED_DATA 7
 #define LED_CLOCK 8
 #define LED_LATCH 9
+
 #define LED1 0
 #define LED2 1
 #define LED3 2
@@ -114,8 +119,6 @@ constexpr unsigned AUTO_CLEAR_CONTROL_MS = 2000;
 #define BUTTON15 48
 #define BUTTON16 52
 #endif
-#define NUM_LEDS 16
-#define MAX_SCENE_LED 9
 
 #elif (BOARD == BOARD_MINI_TESTING) /* for quick testing only 4 buttons mapping */
 #define MIDI_PORT Serial

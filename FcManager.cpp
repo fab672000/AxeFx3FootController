@@ -26,7 +26,7 @@ static byte controllerValue[numberOfPedals];
 // SCENE / PRESETS handling
 #define NUM_SCENES 8
 
-//Struct to hold information about each scene
+//Struct to hold information about each scenePlay
 struct SceneInfo {
   SceneNumber number = -1;
   const char *name;
@@ -184,136 +184,102 @@ void FcManager::onTunerStatus(bool engaged) {
 }
 
 void FcManager::handleEvents() {
+  static bool looperPlaying = false;
+  static int lastScene = -1;
+  static int lastLoopPreset = -1;
+  
+  int sceneOffset; // +1 if second scene row
+  bool isTunerEngaged;
+  
   for (byte currentSwitch = 0; currentSwitch < NUM_BUTTONS; currentSwitch++) {
 #ifdef HAS_MUX
     mux.select(currentSwitch);
 #endif
     Buttons[currentSwitch].update();
     if (Buttons[currentSwitch].fell()) {
-
+      isTunerEngaged = Axe.isTunerEngaged();
+      
+      if (currentSwitch == 13 || isTunerEngaged ) // tuner switch
+      {
+            Axe.toggleTuner();
+           isTunerEngaged = Axe.isTunerEngaged();
+      }
       switch ( currentSwitch ) {
 
-        // Switch 1-4 (Scene 1-4)
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else
-          {
-            doSceneChange(currentSwitch + 1);
-            leds.turnOnSceneLed (currentSwitch + 1);
-          }
+        // Switches 1-4, 6-9 (Scene 1-8)
+        case 0: case 1: case 2: case 3:
+        case 5: case 6: case 7:case 8:
+            sceneOffset = currentSwitch > 3 ? 0 : 1;
+            lastScene = currentSwitch + sceneOffset ;
+            doSceneChange(lastScene );
+            leds.turnOnSceneLed (lastScene );
+            leds.setLooperLeds(0);
           break;
-
-        // Switch 5 (Preset Decrement)
-        case 4:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else {
-            Axe.sendPresetDecrement();
-            leds.flashLed(currentSwitch, PEDAL_ACTIVE_FLASH );
-          }
-          break;
-
-        // Switch 5-8 (Scene 5-8)
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else {
-            doSceneChange(currentSwitch);
-            leds.turnOnSceneLed (currentSwitch);
-          }
-          break;
-
+          
+        // Switch 5  (Preset Decrement)        
+        case 4: 
         // Switch 10 (Preset Increment)
         case 9:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else {
+          if(currentSwitch == 4 ) {
+            Axe.sendPresetDecrement();
+            PresetNumb--;
+          } else {
             Axe.sendPresetIncrement();
-            leds.flashLed( currentSwitch, PEDAL_ACTIVE_FLASH );
+            PresetNumb++;
+          }
+
+          leds.flashLed(currentSwitch, PEDAL_ACTIVE_FLASH );
+          if(lastLoopPreset>=0)
+          {
+            leds.setLooperLeds( PresetNumb == lastLoopPreset && looperPlaying ? 2 : 0);
           }
           break;
 
         // Switch 11 (Looper Record)
         case 10:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else {
+            
             Axe.getLooper().record();
             leds.setLooperLeds(1);
-            //leds.turnOffSceneLeds();
+            leds.turnOffSceneLeds();
+            lastLoopPreset = PresetNumb;
             _display.print(F("RECORD              "));
-
-
-            //  uint32_t ti = (Buttons[currentSwitch].pressedFor());
-            //  PL_(ti);
-
-          }
           break;
 
         // Switch 12 (Looper Play)
         case 11:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else {
             Axe.getLooper().play();
-            leds.setLooperLeds(2);
-            _display.print(F("PLAY                "));
-          }
+            if (!looperPlaying) {
+              leds.setLooperLeds(2);
+              leds.turnOffSceneLeds();
+              _display.print(F("PLAY                "));
+            } else {
+              _display.print(F("STOP                "));
+              leds.setLooperLeds(0);
+              leds.turnOnSceneLed (lastScene );
+              lastLoopPreset = -1;
+            }
+            looperPlaying = !looperPlaying;
           break;
 
         // Switch 13 (Looper Undo)
         case 12:
-          if (Axe.isTunerEngaged()) {
-            Axe.toggleTuner();
-          }
-          else {
             Axe.getLooper().undo();
             leds.setLooperLeds(3);
             leds.turnOffSceneLeds();
-            _display.print(F("UNDO                "));
-          }
+            _display.print(F("UNDO/ERASE          "));
           break;
 
-        // Switch 14 - Swapped to 15 (TUNER ENGAGE)
-        case 13:
-          Serial.println(F("Switch-15 (14) pressed"));
-
-          Axe.toggleTuner();
-          leds.setTunerLed(Axe.isTunerEngaged());
-
-          break;
-
-        // Switch 15 - Swapped to 14
-        case 14:
-
-
-
-          break;
-
-        // Switch 16.
-        case 15:
-          //Serial.println(F("Switch-16 pressed"));
-
+        default:
           break;
 
       }
+
+      leds.setTunerLed(isTunerEngaged);
       Serial.println(F("-----------"));
       Serial.print(F("Switch ")); Serial.print(currentSwitch + 1); Serial.println(F(" pressed."));
-    }
-  }
+
+    } // if Buttons[currentSwitch].fell()) 
+  } // for
   
   // TODO:
   handleExpressionPedals();
