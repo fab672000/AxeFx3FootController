@@ -17,8 +17,10 @@ public:
   void clear() const;
   void presetNameToLCD(int presetNum, byte sceneNum) const;
   void displayFineTune(int fineTune) const;
-  void displayControllerValue(const char* label, byte value) const;
-  void print(const char* msg) const;
+  void displayControllerValue(const char* label, byte num, byte value) const;
+  void clearControllerValue(const char* label, byte num) const;
+
+  void print(const __FlashStringHelper*) const;
 
   static char*  presetNameString();
   static char*  sceneNameString();
