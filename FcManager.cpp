@@ -183,12 +183,27 @@ void FcManager::onTunerStatus(bool engaged) {
   }
 }
 
+int FcManager::sceneFromSwitchValue(int sw) {
+  switch (sw) {
+        case SWITCH_S1:         return 1;
+        case SWITCH_S2:         return 2;
+        case SWITCH_S3:         return 3;
+        case SWITCH_S4:         return 4;
+        case SWITCH_S5:         return 5;
+        case SWITCH_S6:         return 6;
+        case SWITCH_S7:         return 7;
+        case SWITCH_S8:         return 8;
+  }
+  // should never happen, but if it bugs ; then use 1 instead of crashing
+  return 1;
+}
+
 void FcManager::handleEvents() {
   static bool looperPlaying = false;
   static int lastScene = -1;
   static int lastLoopPreset = -1;
   
-  int sceneOffset; // +1 if second scene row
+  int scene; // +1 if second scene row
   bool isTunerEngaged;
   
   for (byte currentSwitch = 0; currentSwitch < NUM_BUTTONS; currentSwitch++) {
@@ -199,7 +214,7 @@ void FcManager::handleEvents() {
     if (Buttons[currentSwitch].fell()) {
       isTunerEngaged = Axe.isTunerEngaged();
       
-      if (currentSwitch == 13 || isTunerEngaged ) // tuner switch
+      if (currentSwitch == SWITCH_TUNER || isTunerEngaged ) // tuner switch
       {
             Axe.toggleTuner();
            isTunerEngaged = Axe.isTunerEngaged();
@@ -207,20 +222,18 @@ void FcManager::handleEvents() {
       switch ( currentSwitch ) {
 
         // Switches 1-4, 6-9 (Scene 1-8)
-        case 0: case 1: case 2: case 3:
-        case 5: case 6: case 7:case 8:
-            sceneOffset = currentSwitch > 3 ? 0 : 1;
-            lastScene = currentSwitch + sceneOffset ;
-            doSceneChange(lastScene );
-            leds.turnOnSceneLed (lastScene );
+        case SWITCH_S1: case SWITCH_S2: case SWITCH_S3: case SWITCH_S4:
+        case SWITCH_S5: case SWITCH_S6: case SWITCH_S7: case SWITCH_S8:
+            scene = sceneFromSwitchValue(currentSwitch);
+            doSceneChange(scene );
+            leds.turnOnSceneLed (scene );
+            lastScene = scene;
             leds.setLooperLeds(0);
           break;
           
-        // Switch 5  (Preset Decrement)        
-        case 4: 
-        // Switch 10 (Preset Increment)
-        case 9:
-          if(currentSwitch == 4 ) {
+        case SWITCH_PRESET_DEC: 
+        case SWITCH_PRESET_INC:
+          if(currentSwitch == SWITCH_PRESET_DEC ) {
             Axe.sendPresetDecrement();
             PresetNumb--;
           } else {
@@ -235,8 +248,7 @@ void FcManager::handleEvents() {
           }
           break;
 
-        // Switch 11 (Looper Record)
-        case 10:
+        case SWITCH_LOOPER_RECORD:
             
             Axe.getLooper().record();
             leds.setLooperLeds(1);
@@ -245,8 +257,7 @@ void FcManager::handleEvents() {
             _display.print(F("RECORD              "));
           break;
 
-        // Switch 12 (Looper Play)
-        case 11:
+        case SWITCH_LOOPER_PLAY:
             Axe.getLooper().play();
             if (!looperPlaying) {
               leds.setLooperLeds(2);
@@ -261,12 +272,15 @@ void FcManager::handleEvents() {
             looperPlaying = !looperPlaying;
           break;
 
-        // Switch 13 (Looper Undo)
-        case 12:
+        case SWITCH_LOOPER_UNDO:
             Axe.getLooper().undo();
             leds.setLooperLeds(3);
             leds.turnOffSceneLeds();
             _display.print(F("UNDO/ERASE          "));
+          break;
+
+        case SWITCH_TAP_TEMPO: // tap tempo
+          Axe.sendTap();
           break;
 
         default:

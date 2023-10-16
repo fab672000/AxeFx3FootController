@@ -16,6 +16,25 @@
 #define BOARD_MINI_TESTING     2 /* AVR or other small boards that have at minimum 3K of RAM */
 #define BOARD   BOARD_SW16_EXP4
 
+// switch special functions mapping
+#define SWITCH_S1              0
+#define SWITCH_S2              1
+#define SWITCH_S3              2
+#define SWITCH_S4              3
+
+#define SWITCH_S5              5
+#define SWITCH_S6              6
+#define SWITCH_S7              7
+#define SWITCH_S8              8
+
+#define SWITCH_TUNER          13
+#define SWITCH_PRESET_INC     14
+#define SWITCH_PRESET_DEC      9
+#define SWITCH_TAP_TEMPO       4
+#define SWITCH_LOOPER_RECORD  10
+#define SWITCH_LOOPER_PLAY    11
+#define SWITCH_LOOPER_UNDO    12
+
 // The board below in conjunction maybe with a NO_DISPLAY could be used for an even more minimal floorboard with no display feedback that could fit on an Arduino Nano or UNO board
 // #define BOARD  BOARD_MINI_TESTING
 
