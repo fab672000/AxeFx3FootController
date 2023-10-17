@@ -17,8 +17,6 @@ static unsigned int pedalValueOld[numberOfPedals];
 static byte controllerValueOld[numberOfPedals];
 static byte controllerValue[numberOfPedals];
 
-// SCENE / PRESETS handling
-#define NUM_SCENES 8
 
 //Struct to hold information about each scenePlay
 struct SceneInfo {
@@ -145,24 +143,6 @@ void FcManager::onTunerStatus(bool engaged) {
   }
 }
 
-int FcManager::sceneFromSwitchValue(int sw) {
-  switch (sw) {
-        case SWITCH_S1:         return 1;
-        case SWITCH_S2:         return 2;
-        case SWITCH_S3:         return 3;
-        case SWITCH_S4:         return 4;
-        case SWITCH_S5:         return 5;
-        case SWITCH_S6:         return 6;
-        case SWITCH_S7:         return 7;
-        case SWITCH_S8:         return 8;
-  }
-  // should never happen, but if it bugs ; then use 1 instead of crashing
-  return 1;
-}
-
-
-static SwitchHoldManager HoldMgr;
-
 void FcManager::handleEvents() {
   static bool looperPlaying = false;
   static int lastScene = -1;
@@ -186,11 +166,13 @@ void FcManager::handleEvents() {
     const auto  changed =  HoldMgr.hasChanged(switchIndex);
     const auto presetOffset = HoldMgr.getPresetAutoRepeatAmplitude(switchIndex);
     
+    constexpr int NumPresets = 1024;
+
     // First handle autorepeat keys:
     if (switchIndex == SWITCH_PRESET_DEC || switchIndex == SWITCH_PRESET_INC) {
       auto newPreset = switchIndex == SWITCH_PRESET_DEC ? 
-        (PresetNumb + 1024 - presetOffset) % 1024 :
-        (PresetNumb + presetOffset) % 1024;
+        (PresetNumb + NumPresets - presetOffset) % NumPresets :
+        (PresetNumb + presetOffset) % NumPresets;
 
       if (fellState || changed) {
         if (switchIndex == SWITCH_PRESET_DEC ) {

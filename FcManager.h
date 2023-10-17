@@ -35,7 +35,6 @@ private:
   void initButtons();
   void handleEvents();
   void handleLayoutChange();
-  static int sceneFromSwitchValue(int sw);
 
   void notifyPresetChanged(AxePreset preset);
 
