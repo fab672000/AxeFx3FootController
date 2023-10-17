@@ -1,6 +1,7 @@
 #pragma once
 #include <AxeFxControl.h>
 #include "ProtocolType.h"
+#include "FootController.h"
 
 class AxePreset;
 
@@ -20,11 +21,12 @@ enum Command {
 /** Simple Foot controller Manager class for fractal products
  *    In future we could derive it from a controller base class for a complete controller agnostic lib and device!
  */ 
-class FcManager {
+class FcManager : public FootController {
 public:
-  FcManager(ProtocolType protType);
-  void begin();
-  void update();
+  FcManager();
+  
+  void init()   override;
+  void update()  override;
 
   void doSceneChange(byte scene);
   void handleExpressionPedals();
@@ -33,7 +35,6 @@ private:
   void initButtons();
   void handleEvents();
   void handleLayoutChange();
-  static int sceneFromSwitchValue(int sw);
 
   void notifyPresetChanged(AxePreset preset);
 

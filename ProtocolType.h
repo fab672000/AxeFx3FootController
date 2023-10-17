@@ -5,7 +5,8 @@
  */
 enum ProtocolType
 { 
-  MIDI_AFX3
+  MIDI_AFX3,  // The Axe FX III midi protocol
+  MIDI_GM,    // standard midi protocol (basically PC = program changes)
   //, AFX2
   // TODO add more midi controller products here!
   

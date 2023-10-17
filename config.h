@@ -2,7 +2,15 @@
 #include <Arduino.h>
 
 // DEBUG Mode:
-#define DEBUG
+//#define DEBUG
+
+#ifdef DEBUG
+# define debug(s) Serial.print(s)
+# define debugln(s) Serial.println(s)
+#else
+# define debug(s)
+# define debugln(s)
+#endif
 
 // BOARDS
 #if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41) || defined(KINETISL) || defined(KINETISK)
@@ -66,6 +74,9 @@ constexpr unsigned AUTO_CLEAR_CONTROL_MS = 2000;
 
 // comment out the line below to get direct buttons mapping (no CD4067 mux)
 #define HAS_MUX
+// SCENE / PRESETS handling
+
+#define NUM_SCENES 8
 
 #define NUM_LEDS 16
 #define MAX_SCENE_LED 9
