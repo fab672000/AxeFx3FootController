@@ -9,13 +9,11 @@ class FastMux
   FastMux(byte a0, byte a1, byte a2) :_a0(a0), _a1(a1), _a2(a2)
   {
     _numBits = 3;
-    begin();
   }
 
   FastMux(byte a0, byte a1, byte a2, byte a3) : _a0(a0), _a1(a1), _a2(a2), _a3(a3)
   {
     _numBits = 4;
-    begin();
   }
   
   
@@ -53,16 +51,18 @@ class FastMux
   }
   
   byte Count()  const { return 1 << (_numBits); }  
- private: 
+ 
   void begin()
   {
     pinMode(_a0, OUTPUT);
     pinMode(_a1, OUTPUT);
     pinMode(_a2, OUTPUT);
-    if(_numBits>3) pinMode(_a3, OUTPUT);
+    if(_numBits > 3) pinMode(_a3, OUTPUT);
     clear();
   }
-  
+
+private:
+
   byte _a0, _a1, _a2, _a3;
   byte _numBits;
   byte _previousAddr; 

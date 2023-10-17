@@ -15,13 +15,18 @@
 // if not using 4067 and/or 595 shifters, comment out teh HAS_MUX and/or the HAS_LED_SHITERS definitions in config.h
 //
 #include "config.h"
-#include "FcManager.h"
-static FcManager footController(ProtocolType::MIDI_AFX3);
+#include "FootController.h"
+#include "SettingsMgr.h"
+
+static SettingsManager settings;
+static FootController* footController;
 
 void setup() {
-  footController.begin();
+  settings.begin();
+  footController = settings.getController();
+  footController->begin();
 }
 
 void loop() {
-    footController.update();
+    footController->update();
 }

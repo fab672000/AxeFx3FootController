@@ -1,19 +1,12 @@
 #include "config.h"
 #include "FcManager.h"
-#include "FcDisplay.h"
-#include "FcLeds.h"
-#include <Bounce2.h>
 #include "ExpPedals.h"
 #include "FastMux.h"
 #include "TimerUtils.h"
 #include "SwitchHoldManager.h"
 
-static FastMux mux(2, 3, 4, 5);
-static ProtocolType _protType;
-static FcDisplay _display;
-static FcLeds leds;
-
 static AxeSystem Axe;
+
 
 //TODO: investigate for use of more tempo  functionality
 // static Tempo tempo;
@@ -40,47 +33,13 @@ static SceneInfo scenes[NUM_SCENES];
 static int  PresetNumb;
 static byte SceNumb;
  
-// BUTTONS handling
+FcManager::FcManager() : FootController(MIDI_AFX3)
+{
 
-static byte ButtonPin[NUM_BUTTONS] = {
-#ifdef HAS_MUX
-  BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,
-  BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16,BUTTON1_16
-#elif (BOARD == BOARD_SW16_EXP4) 
-  BUTTON1, BUTTON2, BUTTON3, BUTTON4, BUTTON5, BUTTON6, BUTTON7, BUTTON8,
-  BUTTON9, BUTTON10, BUTTON11, BUTTON12, BUTTON13, BUTTON14, BUTTON15, BUTTON16
-#elif (BOARD == BOARD_MINI_TESTING) 
-  BUTTON1, BUTTON2, BUTTON3, BUTTON4
-#endif
-};
-
-static Bounce Buttons[NUM_BUTTONS];
-
-void FcManager::initButtons() {
-  for (byte i = 0; i < NUM_BUTTONS; i++) {
-    pinMode(ButtonPin[i], INPUT_PULLUP);
-
-#ifdef HAS_MUX
-    mux.select(i);
-#endif
-    Buttons[i].attach(ButtonPin[i], INPUT_PULLUP);
-    Buttons[i].interval(DEFAULT_DEBOUNCE);
-  }
-}
-
-FcManager::FcManager(ProtocolType protType) {
-  _protType = protType;
 }
 
 /// Controller initialization
-void FcManager::begin() {
-  
-  leds.begin();
-  _display.init();
-#ifdef DEBUG
-  Serial.begin(115200);
-#endif
-  initButtons();
+void FcManager::init() {
   
   Axe.begin(MIDI_PORT); // TODO in future: implement more midi devices not necesarily assuming a direct serial connection
   Axe.registerPresetChangeCallback(onPresetChange);
@@ -97,7 +56,7 @@ void FcManager::begin() {
 
 /// Controller update handling
 void FcManager::update() {
-  leds.update(); // update the timer
+  _leds.update(); // update the timer
   Axe.update();
   handleEvents();
  // handleLayoutChange();
@@ -109,7 +68,7 @@ void FcManager::update() {
 /// as an example the tuner + the loop functiona could be remapped on the second row
 void FcManager::handleLayoutChange(){
     // long press function to Switch 11
-//  if (Buttons[12].pressedFor(2000)) {
+//  if (_buttons[12].pressedFor(2000)) {
 //    PL_("Switch long pressed");
 //  }
 }
@@ -171,7 +130,7 @@ void FcManager::onPresetChange(AxePreset preset) {
   SceNumb = preset.getSceneNumber();
   preset.copySceneName(FcDisplay::sceneNameString(), MaxSceneNameLen + 1);
   _display.presetNameToLCD(PresetNumb, SceNumb);
-  leds.turnOnSceneLed(SceNumb);
+  _leds.turnOnSceneLed(SceNumb);
 }
 
 void FcManager::onTunerData(const char *note, const byte string, const byte fineTune) {
@@ -215,9 +174,9 @@ void FcManager::handleEvents() {
   
   for (byte switchIndex = 0; switchIndex < NUM_BUTTONS; switchIndex++) {
 #ifdef HAS_MUX
-    mux.select(switchIndex);
+    _mux.select(switchIndex);
 #endif
-    auto& currentButton =  Buttons[switchIndex];
+    auto& currentButton =  _buttons[switchIndex];
     currentButton.update();
     
     // handle hold durations
@@ -241,9 +200,9 @@ void FcManager::handleEvents() {
         }
         PresetNumb = newPreset;
 
-        leds.flashLed(switchIndex, PEDAL_ACTIVE_FLASH );
+        _leds.flashLed(switchIndex, PEDAL_ACTIVE_FLASH );
         if(lastLoopPreset >= 0) {
-          leds.setLooperLeds( PresetNumb == lastLoopPreset && looperPlaying ? 2 : 0);
+          _leds.setLooperLeds( PresetNumb == lastLoopPreset && looperPlaying ? 2 : 0);
         }
 
         HoldMgr.clearChanged(switchIndex);
@@ -265,16 +224,16 @@ void FcManager::handleEvents() {
         case SWITCH_S5: case SWITCH_S6: case SWITCH_S7: case SWITCH_S8:
             scene = sceneFromSwitchValue(switchIndex);
             doSceneChange(scene );
-            leds.turnOnSceneLed (scene );
+            _leds.turnOnSceneLed (scene );
             lastScene = scene;
-            leds.setLooperLeds(0);
+            _leds.setLooperLeds(0);
           break;
           
         case SWITCH_LOOPER_RECORD:
             
             Axe.getLooper().record();
-            leds.setLooperLeds(1);
-            leds.turnOffSceneLeds();
+            _leds.setLooperLeds(1);
+            _leds.turnOffSceneLeds();
             lastLoopPreset = PresetNumb;
             _display.print(F("RECORD              "));
           break;
@@ -282,13 +241,13 @@ void FcManager::handleEvents() {
         case SWITCH_LOOPER_PLAY:
             Axe.getLooper().play();
             if (!looperPlaying) {
-              leds.setLooperLeds(2);
-              leds.turnOffSceneLeds();
+              _leds.setLooperLeds(2);
+              _leds.turnOffSceneLeds();
               _display.print(F("PLAY                "));
             } else {
               _display.print(F("STOP                "));
-              leds.setLooperLeds(0);
-              leds.turnOnSceneLed (lastScene );
+              _leds.setLooperLeds(0);
+              _leds.turnOnSceneLed (lastScene );
               lastLoopPreset = -1;
             }
             looperPlaying = !looperPlaying;
@@ -296,8 +255,8 @@ void FcManager::handleEvents() {
 
         case SWITCH_LOOPER_UNDO:
             Axe.getLooper().undo();
-            leds.setLooperLeds(3);
-            leds.turnOffSceneLeds();
+            _leds.setLooperLeds(3);
+            _leds.turnOffSceneLeds();
             _display.print(F("UNDO/ERASE          "));
           break;
 
@@ -306,7 +265,7 @@ void FcManager::handleEvents() {
           break;
       }
 
-      leds.setTunerLed(isTunerEngaged);
+      _leds.setTunerLed(isTunerEngaged);
       Serial.println(F("-----------"));
       Serial.print(F("Switch ")); Serial.print(switchIndex + 1); Serial.println(F(" pressed."));
 
@@ -349,7 +308,7 @@ void FcManager::handleExpressionPedals() {
 }
 
 void FcManager::doSceneChange(byte scene) {
-  leds.turnOnSceneLed(scene);
+  _leds.turnOnSceneLed(scene);
   Axe.sendSceneChange(scene);
   Axe.update();
 }
@@ -366,5 +325,5 @@ void FcManager::onSystemChange() {
 //this will only work if realtime sysex is enabled
 void FcManager::onTapTempo() {
   // Flashes a LED on tempo
-  // leds.flashLed( 3, TAP_TEMPO_LED_DURATION ); // pending assign to correspondent tempo led
+  // _leds.flashLed( 3, TAP_TEMPO_LED_DURATION ); // pending assign to correspondent tempo led
 }

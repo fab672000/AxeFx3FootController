@@ -4,6 +4,14 @@
 // DEBUG Mode:
 #define DEBUG
 
+#ifdef DEBUG
+# define debug(s) Serial.print(s)
+# define debugln(s) Serial.println(s)
+#else
+# define debug(s)
+# define debugln(s)
+#endif
+
 // BOARDS
 #if defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41) || defined(KINETISL) || defined(KINETISK)
 # define TEENSY_BOARD
